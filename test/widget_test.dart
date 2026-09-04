@@ -1,30 +1,42 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+// M3 应用骨架冒烟测试：验证根组件可构建、底部导航与首页渲染。
 
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:jmcomic/main.dart';
+import 'package:jmcomic/app/app.dart';
+import 'package:jmcomic/app/app_state.dart';
+import 'package:jmcomic/data/models/config.dart';
+import 'package:jmcomic/data/providers.dart';
+import 'package:jmcomic/data/repositories/config_repository.dart';
+
+/// 配置仓库替身：同步返回默认配置，使冒烟测试不触碰文件系统。
+class _FakeConfigRepository extends ConfigRepository {
+  @override
+  AppConfig read() => const AppConfig();
+}
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('JmApp 可构建并显示底部导航与首页', (WidgetTester tester) async {
+    // 覆盖 bootstrap：跳过真实初始化（读配置/网络），直接进入 data 态。
+    // 覆盖 configRepository：主题经同步 read() 派生，测试环境无文件 IO。
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          bootstrapProvider.overrideWith((ref) async {}),
+          configRepositoryProvider.overrideWithValue(_FakeConfigRepository()),
+        ],
+        child: const JmApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // 底部导航 4 个 Tab（分类内容已收口到“发现”入口）。
+    expect(find.text('首页'), findsWidgets);
+    expect(find.text('发现'), findsOneWidget);
+    expect(find.text('书架'), findsOneWidget);
+    expect(find.text('我的'), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // 首页 AppBar 标题
+    expect(find.text('JM 漫画'), findsOneWidget);
   });
 }
