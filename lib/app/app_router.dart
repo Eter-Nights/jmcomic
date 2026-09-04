@@ -1,7 +1,6 @@
 /// 应用路由表：四个底部 Tab 用 indexedStack 承载，二级页挂在根级。
 library;
 
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/album_detail/album_detail_page.dart';
@@ -14,6 +13,7 @@ import '../features/profile/checkin/checkin_page.dart';
 import '../features/favorite/favorite_page.dart';
 import '../features/history/history_page.dart';
 import '../features/home/home_page.dart';
+import '../features/profile/about/about_page.dart';
 import '../features/profile/profile_page.dart';
 import '../features/reader/reader_page.dart';
 import '../features/search/search_page.dart';
@@ -46,10 +46,7 @@ final appRouter = GoRouter(
     GoRoute(path: AppRoutes.settings, builder: (_, _) => const SettingsPage()),
     GoRoute(path: AppRoutes.history, builder: (_, _) => const HistoryPage()),
     GoRoute(path: AppRoutes.dailyCheckin, builder: (_, _) => const CheckinPage()),
-    GoRoute(
-      path: AppRoutes.about,
-      builder: (_, _) => const _PlaceholderPage(title: '关于'),
-    ),
+    GoRoute(path: AppRoutes.about, builder: (_, _) => const AboutPage()),
     GoRoute(path: AppRoutes.search, builder: (_, _) => const SearchPage()),
     GoRoute(
       path: AppRoutes.category,
@@ -86,17 +83,3 @@ final appRouter = GoRouter(
   ],
 );
 
-/// 尚未提供功能页的入口占位。
-class _PlaceholderPage extends StatelessWidget {
-  const _PlaceholderPage({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(child: Text('$title 待实现', style: Theme.of(context).textTheme.bodyLarge)),
-    );
-  }
-}
